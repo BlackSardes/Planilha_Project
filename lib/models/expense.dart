@@ -1,4 +1,6 @@
 // Modelo de dados para um gasto
+import 'package:intl/intl.dart';
+
 class Expense {
   final String name;          // Nome da compra (Coluna K)
   final DateTime date;        // Data da compra (Coluna L)
@@ -42,8 +44,13 @@ class Expense {
     return '$day/$month';
   }
 
-  // Retorna o valor formatado como R$ XX,XX
+  // Retorna o valor formatado como R$ XX,XX usando formatação de moeda
   String get formattedValue {
-    return 'R\$ ${value.toStringAsFixed(2).replaceAll('.', ',')}';
+    final formatter = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    );
+    return formatter.format(value).replaceAll('.', ',');
   }
 }

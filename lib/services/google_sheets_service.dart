@@ -59,12 +59,27 @@ class GoogleSheetsService {
       final jsonString = await rootBundle.loadString('assets/credentials.json');
       final json = jsonDecode(jsonString);
       
-      // Suporta tanto credenciais desktop quanto Android
-      final credentials = json['installed'] ?? json['web'];
+      // Tenta carregar credenciais desktop/instaladas primeiro
+      if (json['installed'] != null) {
+        final credentials = json['installed'];
+        return ClientId(
+          credentials['client_id'] as String,
+          credentials['client_secret'] as String? ?? '',
+        );
+      }
       
-      return ClientId(
-        credentials['client_id'] as String,
-        credentials['client_secret'] as String? ?? '',
+      // Tenta carregar credenciais web
+      if (json['web'] != null) {
+        final credentials = json['web'];
+        return ClientId(
+          credentials['client_id'] as String,
+          credentials['client_secret'] as String? ?? '',
+        );
+      }
+      
+      throw Exception(
+        'Formato de credenciais não suportado. '
+        'O arquivo credentials.json deve conter "installed" ou "web".'
       );
     } catch (e) {
       throw Exception(
@@ -172,7 +187,7 @@ class GoogleSheetsService {
         final tokens = jsonDecode(tokenResponse.body);
         
         final accessToken = AccessToken(
-          'Bearer',
+          tokens['token_type'] as String? ?? 'Bearer',
           tokens['access_token'] as String,
           DateTime.now().add(Duration(seconds: tokens['expires_in'] as int)),
         );

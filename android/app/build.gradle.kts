@@ -7,6 +7,7 @@ plugins {
 
 android {
     namespace = "com.blacksardes.expense_tracker"
+    // Using explicit compileSdk to ensure Android 14 compatibility
     compileSdk = 34
     ndkVersion = flutter.ndkVersion
 

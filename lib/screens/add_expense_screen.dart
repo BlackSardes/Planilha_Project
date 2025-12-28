@@ -58,6 +58,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     super.dispose();
   }
 
+  /// Helper para validar e parsear o valor monetário
+  double? _parseValue(String text) {
+    final valueText = text.trim().replaceAll(',', '.');
+    final value = double.tryParse(valueText);
+    return (value != null && value > 0) ? value : null;
+  }
+
   /// Mostra o seletor de data
   Future<void> _selectDate() async {
     final DateTime? picked = await showDatePicker(
@@ -91,11 +98,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       return;
     }
 
-    // Valida o valor
-    final valueText = _valueController.text.trim().replaceAll(',', '.');
-    final value = double.tryParse(valueText);
+    // Valida o valor usando o helper
+    final value = _parseValue(_valueController.text);
     
-    if (value == null || value <= 0) {
+    if (value == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Por favor, insira um valor válido'),
@@ -335,14 +341,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 ),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
                 ],
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Por favor, informe o valor';
                   }
-                  final number = double.tryParse(value.trim().replaceAll(',', '.'));
-                  if (number == null || number <= 0) {
+                  if (_parseValue(value) == null) {
                     return 'Por favor, informe um valor válido';
                   }
                   return null;
